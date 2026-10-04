@@ -1373,6 +1373,10 @@ static GeoProcessFunc sGeoProcessJumpTable[] = {
  * be iterated over.
  */
 void geo_process_node_and_siblings(struct GraphNode *firstNode) {
+    if (firstNode == NULL || firstNode->type >= GRAPH_NODE_TYPE_START + 1) {
+        return;
+    }
+
     s16 iterateChildren = TRUE;
     struct GraphNode *curGraphNode = firstNode;
     struct GraphNode *parent = curGraphNode->parent;
@@ -1384,16 +1388,18 @@ void geo_process_node_and_siblings(struct GraphNode *firstNode) {
     }
 
     do {
+        if (curGraphNode == NULL || curGraphNode->type >= GRAPH_NODE_TYPE_START + 1) {
+            return;
+        }
+
         if (curGraphNode->flags & GRAPH_RENDER_ACTIVE) {
             if (curGraphNode->flags & GRAPH_RENDER_CHILDREN_FIRST) {
                 geo_try_process_children(curGraphNode);
             } else {
                 sGeoProcessJumpTable[curGraphNode->type](curGraphNode);
             }
-        } else {
-            if (curGraphNode->type == GRAPH_NODE_TYPE_OBJECT) {
-                ((struct GraphNodeObject *) curGraphNode)->throwMatrix = NULL;
-            }
+        } else if (curGraphNode->type == GRAPH_NODE_TYPE_OBJECT) {
+            ((struct GraphNodeObject *) curGraphNode)->throwMatrix = NULL;
         }
     } while (iterateChildren && (curGraphNode = curGraphNode->next) != firstNode);
 }

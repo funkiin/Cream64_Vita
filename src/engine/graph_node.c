@@ -517,6 +517,10 @@ struct GraphNodeHeldObject *init_graph_node_held_object(struct AllocOnlyPool *po
         graphNode->objNode = objNode;
         graphNode->fnNode.func = nodeFunc;
         graphNode->playerIndex = playerIndex;
+#ifdef HIGH_FPS_PC
+        vec3f_set(graphNode->prevShadowPos, 0.0f, 0.0f, 0.0f);
+        graphNode->prevShadowPosTimestamp = 0;
+#endif
 
         if (nodeFunc != NULL) {
             nodeFunc(GEO_CONTEXT_CREATE, &graphNode->fnNode.node, pool);
