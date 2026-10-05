@@ -10,6 +10,7 @@
 
 #define VITA_WIDTH 960
 #define VITA_HEIGHT 544
+#define VITA_FRAME_TIME_US 33333ULL
 
 static void gfx_vita_init(const char *window_title) {
     (void)window_title;
@@ -47,7 +48,21 @@ static void gfx_vita_swap_buffers_begin(void) {
 }
 
 static void gfx_vita_swap_buffers_end(void) {
+    static uint64_t next_frame_us = 0;
+
     vglSwapBuffers(GL_FALSE);
+
+    uint64_t now_us = sceKernelGetProcessTimeWide();
+
+    if (next_frame_us == 0 || now_us > next_frame_us + VITA_FRAME_TIME_US) {
+        next_frame_us = now_us + VITA_FRAME_TIME_US;
+    } else {
+        next_frame_us += VITA_FRAME_TIME_US;
+
+        if (next_frame_us > now_us) {
+            sceKernelDelayThread((unsigned int)(next_frame_us - now_us));
+        }
+    }
 }
 
 static double gfx_vita_get_time(void) {
